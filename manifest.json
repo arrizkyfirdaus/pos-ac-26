@@ -1,0 +1,21 @@
+{
+  "name": "Antheng Coffee POS",
+  "short_name": "AnthengPOS",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#0f0f0f",
+  "theme_color": "#d4af37",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://via.placeholder.com/192/d4af37/000000?text=AC",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://via.placeholder.com/512/d4af37/000000?text=Antheng",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
