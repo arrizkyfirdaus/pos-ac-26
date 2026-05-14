@@ -5,37 +5,47 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="style.css">
-    <title>Caffe-POS</title>
+    <title>Caffe-POS Pro</title>
 </head>
 <body>
     <header>
-        <h1>Caffe-POS v1</h1>
-        <div id="status-koneksi">Online</div>
+        <h1>Caffe-POS Pro</h1>
     </header>
 
     <main>
-        <section id="menu-container">
-            <h3>Daftar Menu</h3>
+        <section id="menu-section">
+            <h3>Menu Kafe</h3>
             <div id="menu-grid"></div>
         </section>
 
-        <section id="cart-container">
-            <h3>Pesanan</h3>
+        <section id="checkout-section">
+            <h3>Keranjang</h3>
             <div id="cart-items"></div>
-            <div class="total-area">
-                <strong>Total: Rp <span id="total-harga">0</span></strong>
-                <button id="btn-checkout" onclick="checkout()">Simpan Pesanan</button>
+            
+            <div class="billing-area">
+                <div class="bill-line">
+                    <strong>Total:</strong>
+                    <strong>Rp <span id="total-harga">0</span></strong>
+                </div>
+                <div class="bill-line">
+                    <label>Bayar:</label>
+                    <input type="number" id="input-bayar" placeholder="0" oninput="hitungKembalian()">
+                </div>
+                <div class="bill-line">
+                    <span>Kembali:</span>
+                    <span id="text-kembalian">0</span>
+                </div>
+                <button id="btn-checkout" onclick="checkout()">SIMPAN & CETAK RESI</button>
             </div>
+
+            <hr>
+            <h3>Riwayat 5 Terakhir</h3>
+            <div id="history-list"></div>
         </section>
     </main>
 
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-firestore-compat.js"></script>
     <script src="app.js"></script>
-    <script>
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js');
-        }
-    </script>
 </body>
 </html>
