@@ -1,31 +1,50 @@
-const data = JSON.parse(localStorage.getItem('last_resi'));
+document.addEventListener('DOMContentLoaded', () => {
+    const rawData = localStorage.getItem('last_resi');
+    
+    if (!rawData) {
+        alert("Data transaksi tidak ditemukan!");
+        window.location.href = 'index.html';
+        return;
+    }
 
-if(!data) {
-    document.getElementById('isi-resi').innerHTML = "Data tidak ditemukan.";
-} else {
-    const tgl = new Date().toLocaleString('id-ID');
-    let itemsHtml = data.items.map(i => `
-        <div class="flex">
+    const data = JSON.parse(rawData);
+
+    // 1. Tampilkan Info Header
+    // Jika data dari Firebase, konversi Timestamp. Jika baru input, pakai Date.now()
+    const tgl = data.waktu ? new Date().toLocaleString('id-ID') : new Date().toLocaleString('id-ID');
+    
+    document.getElementById('info-resi').innerHTML = `
+        <div style="display:flex; justify-content:space-between;">
+            <span>Tgl: ${tgl}</span>
+            <span>${data.metode}</span>
+        </div>
+    `;
+
+    // 2. Tampilkan Item
+    const itemContainer = document.getElementById('item-list-resi');
+    itemContainer.innerHTML = data.items.map(i => `
+        <div style="display:flex; justify-content:space-between; font-size: 13px; margin-bottom: 5px;">
             <span>${i.nama} x${i.qty}</span>
-            <span>${i.sub.toLocaleString()}</span>
+            <span>${(i.harga * i.qty).toLocaleString()}</span>
         </div>
     `).join('');
 
-    document.getElementById('isi-resi').innerHTML = `
-        <div class="center">
-            <h2 style="margin-bottom:0;">ANTHENG COFFEE</h2>
-            <p style="font-size:12px;">Jl. Raya Jombang No. 23</p>
-            <hr>
-            <p style="font-size:12px;">${tgl}</p>
-            <p style="font-size:12px;">Pelanggan: ${data.pelanggan}</p>
-            <hr>
+    // 3. Tampilkan Total & Pembayaran
+    const kembalian = (data.tunai - data.total);
+    document.getElementById('total-area-resi').innerHTML = `
+        <div style="display:flex; justify-content:space-between; font-weight:bold;">
+            <span>TOTAL</span>
+            <span>Rp${data.total.toLocaleString()}</span>
         </div>
-        ${itemsHtml}
-        <hr>
-        <div class="flex"><strong>TOTAL</strong> <strong>Rp${data.total.toLocaleString()}</strong></div>
-        <div class="flex"><span>Bayar</span> <span>Rp${data.tunai.toLocaleString()}</span></div>
-        <div class="flex"><span>Kembali</span> <span>Rp${(data.tunai - data.total).toLocaleString()}</span></div>
-        <hr>
-        <p class="center" style="font-size:12px;">Terima Kasih Atas Kunjungan Anda!</p>
+        <div style="display:flex; justify-content:space-between; font-size: 13px; margin-top: 5px;">
+            <span>BAYAR (${data.metode})</span>
+            <span>${data.tunai.toLocaleString()}</span>
+        </div>
+        ${data.metode === 'Tunai' ? `
+        <div style="display:flex; justify-content:space-between; font-size: 13px;">
+            <span>KEMBALI</span>
+            <span>${kembalian.toLocaleString()}</span>
+        </div>
+        ` : ''}
     `;
-}
+});

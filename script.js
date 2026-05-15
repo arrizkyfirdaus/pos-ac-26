@@ -10,82 +10,113 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
+let allMenu = [];
 let keranjang = [];
-let masterMenu = [];
+let metodeTerpilih = "";
 
-// Load Menu ke Dropdown secara Real-time
+// 1. Ambil Menu dari Firebase
 db.collection('koleksi_menu').onSnapshot(snap => {
-    const sel = document.getElementById('select-menu');
-    sel.innerHTML = '<option value="">Pilih Menu</option>';
-    masterMenu = [];
-    snap.forEach(doc => {
-        masterMenu.push({id: doc.id, ...doc.data()});
-        sel.innerHTML += `<option value="${doc.id}">${doc.data().nama} - Rp${doc.data().harga.toLocaleString()}</option>`;
-    });
+    allMenu = [];
+    snap.forEach(doc => allMenu.push({ id: doc.id, ...doc.data() }));
+    renderMenu(allMenu);
 });
 
-window.tambahItem = () => {
-    const id = document.getElementById('select-menu').value;
-    const q = parseInt(document.getElementById('qty').value) || 1;
-    if(!id) return alert("Pilih menu dulu!");
+function renderMenu(data) {
+    const grid = document.getElementById('grid-menu');
+    grid.innerHTML = data.map(m => `
+        <div class="menu-card" onclick="tambahKeKeranjang('${m.id}')">
+            <div style="font-weight:bold; font-size:15px;">${m.nama}</div>
+            <div style="color:#d4af37; margin-top:5px;">Rp${m.harga.toLocaleString()}</div>
+        </div>
+    `).join('');
+}
 
-    const m = masterMenu.find(i => i.id === id);
-    keranjang.push({...m, qty: q, sub: m.harga * q});
-    render();
+// 2. Fungsi Cari Menu
+window.filterMenu = () => {
+    const keyword = document.getElementById('search-menu').value.toLowerCase();
+    const filtered = allMenu.filter(m => m.nama.toLowerCase().includes(keyword));
+    renderMenu(filtered);
 };
 
-function render() {
-    const container = document.getElementById('list-pesanan');
-    container.innerHTML = '';
-    let tot = 0;
-    keranjang.forEach((item, i) => {
-        tot += item.sub;
-        container.innerHTML += `
-        <div class="item-row">
-            <span>${item.nama} (x${item.qty})</span>
-            <span class="gold">Rp${item.sub.toLocaleString()} 
-                <button onclick="hapusItem(${i})" style="background:none; border:none; color:red; margin-left:10px;">✕</button>
-            </span>
-        </div>`;
-    });
-    document.getElementById('total-txt').innerText = `Rp${tot.toLocaleString()}`;
-    kalkulasi();
+// 3. Tambah Item (Klik Langsung Masuk)
+window.tambahKeKeranjang = (id) => {
+    const item = allMenu.find(m => m.id === id);
+    const adaDiKeranjang = keranjang.find(k => k.id === id);
+
+    if (adaDiKeranjang) {
+        adaDiKeranjang.qty++;
+    } else {
+        keranjang.push({ ...item, qty: 1 });
+    }
+    updateUIKeranjang();
+};
+
+function updateUIKeranjang() {
+    const list = document.getElementById('cart-list');
+    let total = 0;
+    list.innerHTML = keranjang.map((k, index) => {
+        total += k.harga * k.qty;
+        return `
+            <div style="display:flex; justify-content:space-between; margin-bottom:10px; padding:10px; background:#f9f9f9; border-radius:8px;">
+                <div><b>${k.nama}</b><br><small>${k.qty} x ${k.harga.toLocaleString()}</small></div>
+                <div style="font-weight:bold;">Rp${(k.harga * k.qty).toLocaleString()}</div>
+                <div onclick="hapusItem(${index})" style="color:red; margin-left:10px; cursor:pointer;">✕</div>
+            </div>
+        `;
+    }).join('');
+    document.getElementById('total-txt').innerText = `Rp${total.toLocaleString()}`;
 }
 
 window.hapusItem = (index) => {
     keranjang.splice(index, 1);
-    render();
+    updateUIKeranjang();
 };
 
-window.kalkulasi = () => {
-    const tot = keranjang.reduce((a,b) => a + b.sub, 0);
-    const bayar = Number(document.getElementById('tunai').value) || 0;
-    const sisa = bayar - tot;
-    const kembaliTxt = document.getElementById('kembali-txt');
-    kembaliTxt.innerText = `Rp${sisa.toLocaleString()}`;
-    kembaliTxt.style.color = sisa < 0 ? 'red' : '#d4af37';
+// 4. Proses Pembayaran
+window.bukaModalBayar = () => {
+    if (keranjang.length === 0) return alert("Pilih menu dulu!");
+    document.getElementById('modal-bayar').style.display = 'flex';
 };
 
-window.prosesTransaksi = async () => {
-    const tot = keranjang.reduce((a,b) => a + b.sub, 0);
-    const tunai = Number(document.getElementById('tunai').value);
+window.tutupModal = () => {
+    document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
+};
+
+window.pilihMetode = (m) => {
+    metodeTerpilih = m;
+    document.getElementById('input-tunai-area').style.display = (m === 'Tunai') ? 'block' : 'none';
+};
+
+window.prosesFinal = async () => {
+    if (!metodeTerpilih) return alert("Pilih metode bayar!");
     
-    if(keranjang.length === 0) return alert("Keranjang kosong!");
-    if(tunai < tot) return alert("Uang tunai kurang!");
+    const total = keranjang.reduce((a, b) => a + (b.harga * b.qty), 0);
+    const tunai = Number(document.getElementById('uang-tunai').value) || total;
 
-    const data = {
-        pelanggan: document.getElementById('nama-pelanggan').value || "Guest",
+    const dataTransaksi = {
         items: keranjang,
-        total: tot,
+        total: total,
+        metode: metodeTerpilih,
         tunai: tunai,
         waktu: firebase.firestore.FieldValue.serverTimestamp()
     };
 
     try {
-        localStorage.setItem('last_resi', JSON.stringify(data));
-        await db.collection('koleksi_transaksi').add(data);
-        window.location.href = "resi.html"; 
+        await db.collection('koleksi_transaksi').add(dataTransaksi);
+        localStorage.setItem('last_resi', JSON.stringify(dataTransaksi)); // Untuk resi.html
+        document.getElementById('modal-bayar').style.display = 'none';
+        document.getElementById('modal-success').style.display = 'flex';
     } catch (e) {
-        alert("Gagal simpan: " + e.message);
+        alert("Gagal simpan transaksi: " + e);
     }
 };
+
+window.cetakStruk = () => {
+    window.location.href = 'resi.html';
+};
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js')
+    .then(() => console.log("Antheng POS Ready Offline!"))
+    .catch(err => console.log("SW Register Failed", err));
+}

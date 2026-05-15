@@ -3,44 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="style.css">
-    <title>Antheng Coffee - Kasir</title>
+    <link rel="manifest" href="manifest.json">
+    <title>Kasir - Antheng Coffee</title>
 </head>
-<body class="dark-mode">
-    <div class="app-container">
-        <header>
-            <h2 class="gold">Antheng Coffee</h2>
-        </header>
+<body class="qasir-layout">
+    <nav class="side-nav">
+        <div class="logo">AC</div>
+        <a href="index.html" class="active">🛒</a>
+        <a href="riwayat.html">📜</a>
+        <a href="admin.html">📊</a>
+    </nav>
 
-        <section class="card">
-            <input type="text" id="nama-pelanggan" placeholder="Nama Pelanggan">
-            <div class="row">
-                <select id="select-menu">
-                    <option value="">Pilih Menu</option>
-                </select>
-                <input type="number" id="qty" value="1" min="1">
-                <button onclick="tambahItem()" class="btn-gold">+</button>
-            </div>
-        </section>
-
-        <div id="list-pesanan" class="scroll-area">
+    <main class="main-content">
+        <div class="pos-area">
+            <div class="menu-section">
+                <div class="header-search">
+                    <input type="text" id="search-menu" placeholder="Cari menu... (klik item untuk tambah)" oninput="filterMenu()">
+                </div>
+                <div id="grid-menu" class="menu-grid">
+                    </div>
             </div>
 
-        <div class="payment-bar">
-            <input type="number" id="tunai" placeholder="Uang Tunai (Rp)" oninput="kalkulasi()">
-            <div class="info">
-                <p>Total: <span id="total-txt" class="gold">Rp0</span></p>
-                <p>Kembali: <span id="kembali-txt" class="gold">Rp0</span></p>
+            <div class="cart-section">
+                <h3>Pesanan Baru</h3>
+                <div id="cart-list" class="cart-items">
+                    </div>
+                <div class="cart-footer">
+                    <div class="total-row">
+                        <span>Total Bayar</span>
+                        <h2 id="total-txt" class="gold">Rp0</h2>
+                    </div>
+                    <button class="btn-confirm" onclick="bukaModalBayar()">KONFIRMASI BAYAR</button>
+                </div>
             </div>
-            <button onclick="prosesTransaksi()" class="btn-confirm">SIMPAN & CETAK</button>
         </div>
+    </main>
 
-        <nav class="bottom-nav">
-            <a href="index.html" class="active">🛒 Kasir</a>
-            <a href="riwayat.html">📜 Riwayat</a>
-            <a href="admin.html">⚙️ Admin</a>
-        </nav>
+    <div id="modal-bayar" class="modal">
+        <div class="modal-content">
+            <h3>Metode Pembayaran</h3>
+            <div class="payment-options" style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin:20px 0;">
+                <button onclick="pilihMetode('Tunai')" class="btn-primary" style="background:#2ecc71;">💵 TUNAI</button>
+                <button onclick="pilihMetode('QRIS')" class="btn-primary" style="background:#3498db;">📱 QRIS</button>
+            </div>
+            <div id="input-tunai-area" style="display:none; margin-bottom:20px;">
+                <input type="number" id="uang-tunai" placeholder="Jumlah uang tunai..." style="width:100%; padding:12px; border-radius:10px; border:1px solid #ddd;">
+            </div>
+            <button class="btn-confirm" style="width:100%;" onclick="prosesFinal()">SELESAIKAN TRANSAKSI</button>
+            <p onclick="tutupModal()" style="margin-top:15px; cursor:pointer; color:red; font-size:14px;">Batalkan</p>
+        </div>
+    </div>
+
+    <div id="modal-success" class="modal">
+        <div class="modal-content">
+            <h1 style="font-size:50px; margin:0;">✅</h1>
+            <h2>Berhasil!</h2>
+            <button class="btn-confirm" onclick="window.location.reload()" style="width:100%; margin-bottom:10px;">TRANSAKSI SELANJUTNYA</button>
+            <button class="btn-primary" onclick="cetakStruk()" style="width:100%; background:#fff; color:#d4af37; border:1px solid #d4af37;">CETAK STRUK</button>
+        </div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>

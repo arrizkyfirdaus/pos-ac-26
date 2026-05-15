@@ -2,67 +2,74 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
     <title>Admin Dashboard - Antheng Coffee</title>
 </head>
-<body class="dark-mode">
-    <div class="app-container">
-        <header>
-            <h2 class="gold">Dashboard Admin</h2>
-        </header>
+<body class="qasir-layout">
+    <nav class="side-nav">
+        <div class="logo">AC</div>
+        <a href="index.html">🛒</a>
+        <a href="riwayat.html">📜</a>
+        <a href="admin.html" class="active">📊</a>
+    </nav>
 
-        <section class="stats-grid">
-            <div class="stat-box">
-                <small>Omzet Penjualan</small>
-                <p id="stat-omzet">Rp0</p>
-            </div>
-            <div class="stat-box">
-                <small>Total Pengeluaran</small>
-                <p id="stat-total-keluar" style="color: #e74c3c;">Rp0</p>
-            </div>
-        </section>
+    <main class="main-content">
+        <div style="width: 100%;">
+            <header style="margin-bottom: 25px;">
+                <h2 class="gold">Laporan & Manajemen</h2>
+                <p style="color: #636e72; font-size: 14px;">Pantau performa Antheng Coffee hari ini</p>
+            </header>
 
-        <section class="card" style="text-align: center;">
-            <input type="number" id="saldo-awal" placeholder="Saldo Awal / Modal (Rp)">
-            <button onclick="hitungLaporan()" class="btn-confirm" style="margin-top: 5px;">HITUNG LABA BERSIH</button>
-            <div style="margin-top: 15px;">
-                <small>Estimasi Laba Bersih:</small>
-                <h2 id="stat-laba" class="gold" style="margin: 5px 0;">Rp0</h2>
-            </div>
-        </section>
-
-        <section class="card">
-            <h3>Catat Pengeluaran Baru</h3>
-            <input type="text" id="ket-pengeluaran" placeholder="Keterangan (Contoh: Beli Es Batu)">
-            <input type="number" id="nom-pengeluaran" placeholder="Nominal (Rp)">
-            <button onclick="simpanPengeluaran()" class="btn-gold" style="width: 100%;">SIMPAN PENGELUARAN</button>
-            
-            <div id="list-pengeluaran-harian" style="margin-top: 15px; max-height: 150px; overflow-y: auto;">
+            <section class="stats-grid">
+                <div class="stat-box">
+                    <small>Total Omzet</small>
+                    <p id="stat-omzet" class="gold">Rp0</p>
                 </div>
-        </section>
+                <div class="stat-box">
+                    <small>Pengeluaran</small>
+                    <p id="stat-total-keluar" style="color: #ff7675;">Rp0</p>
+                </div>
+                <div class="stat-box">
+                    <small>Laba Bersih</small>
+                    <p id="stat-laba" style="color: #55efc4;">Rp0</p>
+                </div>
+                <div class="stat-box">
+                    <small>Transaksi</small>
+                    <p id="stat-count">0</p>
+                </div>
+            </section>
 
-        <section class="card">
-            <h3>🔥 Menu Terlaris</h3>
-            <div id="best-seller-list"></div>
-        </section>
+            <div class="admin-grid-layout">
+                <div class="admin-card">
+                    <div class="card-header">
+                        <h3>📦 Kelola Daftar Menu</h3>
+                        <span class="badge-count" id="menu-count">0 Menu</span>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="m-nama" placeholder="Nama Menu (misal: Es Kopi Susu)">
+                        <input type="number" id="m-harga" placeholder="Harga Jual (Rp)">
+                        <button onclick="tambahMenu()" class="btn-primary">＋ TAMBAH MENU</button>
+                    </div>
+                    <div class="list-container" id="admin-menu-list">
+                        </div>
+                </div>
 
-        <section class="card" style="margin-bottom: 100px;">
-            <h3>Kelola Daftar Menu</h3>
-            <div class="row">
-                <input type="text" id="m-nama" placeholder="Nama Menu">
-                <input type="number" id="m-harga" placeholder="Harga">
+                <div class="admin-card">
+                    <div class="card-header">
+                        <h3>💸 Catat Pengeluaran</h3>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="ket-pengeluaran" placeholder="Keterangan (misal: Beli Gas)">
+                        <input type="number" id="nom-pengeluaran" placeholder="Nominal (Rp)">
+                        <button onclick="simpanPengeluaran()" class="btn-danger-outline">CATAT PENGELUARAN</button>
+                    </div>
+                    <div class="list-container" id="list-pengeluaran">
+                        </div>
+                </div>
             </div>
-            <button onclick="tambahMenu()" class="btn-gold" style="width: 100%; margin-bottom: 15px;">TAMBAH MENU</button>
-            <div id="admin-menu-list"></div>
-        </section>
-
-        <nav class="bottom-nav">
-            <a href="index.html">🛒 Kasir</a>
-            <a href="riwayat.html">📜 Riwayat</a>
-            <a href="admin.html" class="active">⚙️ Admin</a>
-        </nav>
-    </div>
+        </div>
+    </main>
 
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-firestore-compat.js"></script>

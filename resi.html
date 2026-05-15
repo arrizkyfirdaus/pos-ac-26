@@ -3,27 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Struk Pembayaran - Antheng Coffee</title>
+    <title>Struk - Antheng Coffee</title>
     <style>
-        body { background: #eee; font-family: 'Courier New', Courier, monospace; display: flex; justify-content: center; padding: 20px; }
-        .resi-card { background: white; width: 300px; padding: 20px; box-shadow: 0 0 10px rgba(0,0,0,0.1); color: black; }
-        .center { text-align: center; }
-        hr { border: none; border-top: 1px dashed #000; }
-        .flex { display: flex; justify-content: space-between; margin: 5px 0; }
-        .btn-area { position: fixed; bottom: 20px; display: flex; gap: 10px; }
-        button { padding: 10px 20px; border-radius: 5px; border: none; cursor: pointer; font-weight: bold; }
-        @media print { .btn-area { display: none; } body { background: white; padding: 0; } .resi-card { box-shadow: none; width: 100%; } }
+        body { font-family: 'Courier New', monospace; background: #f4f7f6; padding: 20px; }
+        .struk { background: white; width: 300px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; }
+        .line { border-top: 1px dashed #000; margin: 10px 0; }
+        .text-center { text-align: center; }
+        button { width: 300px; display: block; margin: 10px auto; padding: 15px; border: none; border-radius: 8px; cursor: pointer; }
+        @media print { .no-print { display: none; } .struk { border: none; width: 100%; } }
     </style>
 </head>
 <body>
-    <div class="resi-card" id="isi-resi">
+    <div id="isi-struk" class="struk">
+        <div class="text-center">
+            <h2 style="margin:0;">ANTHENG COFFEE</h2>
+            <small>Jombang, Jawa Timur</small>
         </div>
-
-    <div class="btn-area">
-        <button onclick="window.location.href='index.html'" style="background:#555; color:white;">KEMBALI</button>
-        <button onclick="window.print()" style="background:#d4af37; color:black;">CETAK / JPG</button>
+        <div class="line"></div>
+        <div id="header-resi"></div>
+        <div class="line"></div>
+        <div id="item-resi"></div>
+        <div class="line"></div>
+        <div id="footer-resi"></div>
+        <div class="line"></div>
+        <p class="text-center">Terima Kasih!<br>Selamat Menikmati</p>
     </div>
 
-    <script src="resiScript.js"></script>
+    <div class="no-print">
+        <button onclick="window.print()" style="background:#d4af37; color:white; font-weight:bold;">🖨️ CETAK STRUK</button>
+        <button onclick="window.location.href='index.html'" style="background:#2d3436; color:white;">🛒 KEMBALI KE KASIR</button>
+    </div>
+
+    <script>
+        const data = JSON.parse(localStorage.getItem('last_resi'));
+        if (data) {
+            document.getElementById('header-resi').innerHTML = `Tgl: ${new Date().toLocaleString('id-ID')}<br>Metode: ${data.metode}`;
+            document.getElementById('item-resi').innerHTML = data.items.map(i => `
+                <div style="display:flex; justify-content:space-between;">
+                    <span>${i.nama} x${i.qty}</span>
+                    <span>${(i.harga * i.qty).toLocaleString()}</span>
+                </div>
+            `).join('');
+            document.getElementById('footer-resi').innerHTML = `
+                <div style="display:flex; justify-content:space-between; font-weight:bold;">
+                    <span>TOTAL</span><span>Rp${data.total.toLocaleString()}</span>
+                </div>
+                <div style="display:flex; justify-content:space-between;">
+                    <span>BAYAR</span><span>Rp${(data.tunai || data.total).toLocaleString()}</span>
+                </div>
+                <div style="display:flex; justify-content:space-between;">
+                    <span>KEMBALI</span><span>Rp${((data.tunai || data.total) - data.total).toLocaleString()}</span>
+                </div>
+            `;
+        }
+    </script>
 </body>
 </html>

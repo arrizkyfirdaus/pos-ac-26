@@ -1,45 +1,43 @@
-const cacheName = 'antheng-v1';
+const cacheName = 'antheng-v3-final';
 const assets = [
   './',
   './index.html',
-  './riwayat.html',
   './admin.html',
+  './riwayat.html',
   './resi.html',
   './style.css',
   './script.js',
-  './riwayatScript.js',
   './adminScript.js',
+  './riwayatScript.js',
   './resiScript.js',
   './manifest.json'
 ];
 
-// Install Service Worker & Caching Aset
+// Tahap Install: Simpan semua file ke cache HP
 self.addEventListener('install', e => {
   e.waitUntil(
     caches.open(cacheName).then(cache => {
-      console.log('Caching assets...');
       return cache.addAll(assets);
     })
   );
 });
 
-// Aktivasi & Hapus Cache Lama
-self.addEventListener('activate', e => {
-  e.waitUntil(
-    caches.keys().then(keys => {
-      return Promise.all(keys
-        .filter(key => key !== cacheName)
-        .map(key => caches.delete(key))
-      );
+// Tahap Fetch: Ambil dari cache jika jaringan gagal
+self.addEventListener('fetch', e => {
+  e.respondWith(
+    caches.match(e.request).then(res => {
+      return res || fetch(e.request);
     })
   );
 });
 
-// Fetching Aset dari Cache (Offline Support)
-self.addEventListener('fetch', e => {
-  e.respondWith(
-    caches.match(e.request).then(cacheRes => {
-      return cacheRes || fetch(e.request);
+// Tahap Activate: Hapus cache versi lama
+self.addEventListener('activate', e => {
+  e.waitUntil(
+    caches.keys().then(keys => {
+      return Promise.all(
+        keys.filter(key => key !== cacheName).map(key => caches.delete(key))
+      );
     })
   );
 });
